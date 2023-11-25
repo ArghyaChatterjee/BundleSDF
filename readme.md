@@ -1,11 +1,4 @@
 # BundleSDF: Neural 6-DoF Tracking and 3D Reconstruction of Unknown Objects
-
-<img src="./media/problem_setup_c.gif" width="80%">
-
-<img src="./media/preview_results_c.gif" width="80%">
-
-<img src="./media/driller.gif" width="80%">
-
 # Data download
 - Download pretrained [weights of segmentation network](https://drive.google.com/file/d/1MEZvjbBdNAOF7pXcq6XPQduHeXB50VTc/view?usp=share_link), and put it under
 `./BundleTrack/XMem/saves/XMem-s012.pth`
@@ -21,26 +14,26 @@
     └── masks_XMem
   ```
 
-
 # Docker/Environment setup
 - Clone the repository.
 ```
-git clone ...
+git clone https://github.com/ArghyaChatterjee/BundleSDF.git
 ```
 - Build the docker image (this only needs to do once and can take some time).
 ```
-cd docker
+cd ~/BundleSDF/docker
 docker build --network host -t nvcr.io/nvidian/bundlesdf .
 ```
 
-- Start a docker container the first time
+- Start a docker container
 ```
 cd docker && bash run_container.sh
-
-# Inside docker container, compile the packages which are machine dependent
+```
+- Inside docker container, compile the packages which are machine dependent
+```
 bash build.sh
 ```
-- Do some changes inside your setup.
+- Do some changes inside your setup:
 ```
 # Update all packages in the environment
 conda update --all   
@@ -51,6 +44,16 @@ strings /opt/conda/envs/py38/lib/libstdc++.so.6 | grep GLIBCXX
 # Source the path
 export LD_LIBRARY_PATH=/opt/conda/envs/py38/lib:$LD_LIBRARY_PATH
 ```
+
+# Run on example HO3D dataset
+```
+# Run BundleSDF to get the pose and reconstruction results
+python run_ho3d.py --video_dirs /home/arghya/BundleSDF/HO3D_v3/evaluation/SM1 --out_dir /home/arghya/BundleSDF/ho3d_v3_generated_mesh
+
+# Benchmark the output results
+python benchmark_ho3d.py --video_dirs /home/arghya/BundleSDF/HO3D_v3/evaluation/SM1 --out_dir /home/arghya/BundleSDF/ho3d_v3_generated_mesh
+```
+
 # Run on your custom data
 - Prepare your RGBD video folder as below (also refer to the example milk data). You can find an [example milk data here](https://drive.google.com/file/d/1akutk_Vay5zJRMr3hVzZ7s69GT4gxuWN/view?usp=share_link) for testing.
 ```
@@ -60,7 +63,6 @@ root
   ├──masks/       (PNG files. Filename same as rgb. 0 is background. Else is foreground)
   └──cam_K.txt   (3x3 intrinsic matrix, use space and enter to delimit)
 ```
-
 Due to license issues, we are not able to include [XMem](https://github.com/hkchengrex/XMem) in this codebase for running segmentation online. If you are interested in doing so, please download the code separately and add a wrapper in `segmentation_utils.py`.
 
 - Run your RGBD video (specify the video_dir and your desired output path). There are 3 steps.
@@ -78,16 +80,11 @@ python run_custom.py --mode draw_pose --out_folder /home/bowen/debug/bundlesdf_2
 - Finally the results will be dumped in the `out_folder`, including the tracked poses stored in `ob_in_cam/` and reconstructed mesh with texture `textured_mesh.obj`.
 
 <img src="./media/milk_jug.gif" height="400">
+<img src="./media/problem_setup_c.gif" width="80%">
 
+<img src="./media/preview_results_c.gif" width="80%">
 
-# Run on HO3D dataset
-```
-# Run BundleSDF to get the pose and reconstruction results
-python run_ho3d.py --video_dirs /mnt/9a72c439-d0a7-45e8-8d20-d7a235d02763/DATASET/HO3D_v3/evaluation/SM1 --out_dir /home/bowen/debug/ho3d_ours
-
-# Benchmark the output results
-python benchmark_ho3d.py --video_dirs /mnt/9a72c439-d0a7-45e8-8d20-d7a235d02763/DATASET/HO3D_v3/evaluation/SM1 --out_dir /home/bowen/debug/ho3d_ours
-```
+<img src="./media/driller.gif" width="80%">
 
 # Contact
 For questions, please contact Bowen Wen (bowenw@nvidia.com)
